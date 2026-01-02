@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nigeria 2026 Tax Calculator</title>
+
+<style>
+*{box-sizing:border-box;font-family:Arial, sans-serif;}
+body{margin:0;background:#f4f6f8;display:flex;justify-content:center;padding:20px;}
+.container{background:#fff;max-width:750px;width:100%;padding:25px;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.1);}
+h1{text-align:center;margin-bottom:5px;color:#0a3cff;}
+p{text-align:center;color:#555;font-size:14px;}
+h2{margin-top:30px;color:#222;border-bottom:2px solid #eee;padding-bottom:5px;}
+label{font-weight:bold;margin-top:15px;display:block;}
+select,input{width:100%;padding:12px;margin-top:6px;border-radius:8px;border:1px solid #ccc;font-size:16px;}
+button{width:100%;margin-top:20px;padding:14px;border:none;border-radius:10px;background:#0a3cff;color:#fff;font-size:18px;cursor:pointer;}
+button:hover{background:#082fc4;}
+.result{margin-top:20px;padding:15px;background:#f0f4ff;border-left:5px solid #0a3cff;border-radius:8px;}
+.note{font-size:13px;color:#666;margin-top:10px;}
+.divider{margin:40px 0;height:1px;background:#eee;}
+@media(max-width:480px){h1{font-size:22px;}}
+</style>
+</head>
+<body>
+<div class="container">
+<h1> Tax Calculator</h1>
+
+
+<!-- TAX CALCULATOR -->
+<h2>Income / Company Tax</h2>
+<label>Taxpayer Type</label>
+<select id="type">
+<option value="individual">Individual</option>
+<option value="small">Small Company</option>
+<option value="standard">Standard Company</option>
+<option value="multinational">Multinational Company</option>
+</select>
+
+<label>Annual Income / Profit (₦)</label>
+<input type="number" id="income" placeholder="e.g. 5000000">
+
+<button onclick="calculateTax()">Calculate Tax</button>
+
+<div class="result" id="taxResult" style="display:none;">
+<p id="taxOutput"></p>
+<p class="note" id="taxNote"></p>
+</div>
+
+<div class="divider"></div>
+
+<!-- VAT CALCULATOR -->
+<h2>VAT Calculator (7.5%)</h2>
+<label>Item Price (₦)</label>
+<input type="number" id="vatAmount" placeholder="e.g. 10000">
+<label>VAT Status</label>
+<select id="vatType">
+<option value="taxable">VAT-able Item</option>
+<option value="exempt">VAT-Exempt Item</option>
+</select>
+<button onclick="calculateVAT()">Calculate VAT</button>
+
+<div class="result" id="vatResult" style="display:none;">
+<p id="vatOutput"></p>
+<p class="note" id="vatNote"></p>
+</div>
+
+<div class="divider"></div>
+
+<!-- WHT CALCULATOR -->
+<h2>Withholding Tax (WHT)</h2>
+<label>Payment Amount (₦)</label>
+<input type="number" id="whtAmount" placeholder="e.g. 100000">
+<label>WHT Type</label>
+<select id="whtType">
+<option value="5">Dividends / Rent (5%)</option>
+<option value="10">Interest / Royalties (10%)</option>
+<option value="15">Professional Fees / Contracts (15%)</option>
+</select>
+<button onclick="calculateWHT()">Calculate WHT</button>
+
+<div class="result" id="whtResult" style="display:none;">
+<p id="whtOutput"></p>
+<p class="note" id="whtNote"></p>
+</div>
+
+<div class="divider"></div>
+
+<!-- CGT CALCULATOR -->
+<h2>Capital Gains Tax (CGT)</h2>
+<label>Asset Sale Amount (₦)</label>
+<input type="number" id="cgtAmount" placeholder="e.g. 2000000">
+<label>Taxpayer</label>
+<select id="cgtType">
+<option value="individual">Individual (10%)</option>
+<option value="company">Company (30%)</option>
+</select>
+<button onclick="calculateCGT()">Calculate CGT</button>
+
+<div class="result" id="cgtResult" style="display:none;">
+<p id="cgtOutput"></p>
+<p class="note" id="cgtNote"></p>
+</div>
+
+</div>
+
+<script>
+// ---------------- TAX ----------------
+function calculateTax(){
+const type=document.getElementById("type").value;
+const income=Number(document.getElementById("income").value);
+const box=document.getElementById("taxResult");
+const output=document.getElementById("taxOutput");
+const note=document.getElementById("taxNote");
+
+if(income<=0){alert("Please enter a valid amount");return;}
+
+let tax=0,message="";
+if(type==="individual"){
+if(income<=800000) tax=0;
+else if(income<=3000000) tax=(income-800000)*0.15;
+else if(income<=12000000) tax=(2200000*0.15)+(income-3000000)*0.18;
+else if(income<=25000000) tax=(2200000*0.15)+(9000000*0.18)+(income-12000000)*0.21;
+else if(income<=50000000) tax=(2200000*0.15)+(9000000*0.18)+(13000000*0.21)+(income-25000000)*0.23;
+else tax=(2200000*0.15)+(9000000*0.18)+(13000000*0.21)+(25000000*0.23)+(income-50000000)*0.25;
+message="Personal Income Tax (PAYE)";
+}
+if(type==="small"){tax=0;message="Small companies exempt from CIT";}
+if(type==="standard"){tax=income*(0.30+0.04);message="30% Corporate Tax + 4% Development Levy";}
+if(type==="multinational"){const total=income*(0.30+0.04);const minimum=income*0.15;tax=total<minimum?minimum:total;message=total<minimum?"15% Minimum Effective Tax applied":"Corporate Tax + Development Levy";}
+box.style.display="block";
+output.innerHTML=`₦${tax.toLocaleString()}`;
+note.innerText=message;
+}
+
+// ---------------- VAT ----------------
+function calculateVAT(){
+const amount=Number(document.getElementById("vatAmount").value);
+const type=document.getElementById("vatType").value;
+const box=document.getElementById("vatResult");
+const output=document.getElementById("vatOutput");
+const note=document.getElementById("vatNote");
+
+if(amount<=0){alert("Enter a valid price");return;}
+
+let vat=0,total=amount;
+if(type==="taxable"){vat=amount*0.075;total=amount+vat;note.innerText="VAT charged at 7.5%";}
+else{vat=0;total=amount;note.innerText="This item is VAT-exempt";}
+
+box.style.display="block";
+output.innerHTML=`VAT: ₦${vat.toLocaleString()} <br><strong>Total Price:</strong> ₦${total.toLocaleString()}`;
+}
+
+// ---------------- WHT ----------------
+function calculateWHT(){
+const amount=Number(document.getElementById("whtAmount").value);
+const rate=Number(document.getElementById("whtType").value);
+const box=document.getElementById("whtResult");
+const output=document.getElementById("whtOutput");
+const note=document.getElementById("whtNote");
+
+if(amount<=0){alert("Enter valid amount");return;}
+
+const tax=(amount*rate)/100;
+box.style.display="block";
+output.innerHTML=`WHT (${rate}%): ₦${tax.toLocaleString()}<br>Total Payment After WHT: ₦${(amount-tax).toLocaleString()}`;
+note.innerText="Withholding Tax deducted at source";
+}
+
+// ---------------- CGT ----------------
+function calculateCGT(){
+const amount=Number(document.getElementById("cgtAmount").value);
+const type=document.getElementById("cgtType").value;
+const box=document.getElementById("cgtResult");
+const output=document.getElementById("cgtOutput");
+const note=document.getElementById("cgtNote");
+
+if(amount<=0){alert("Enter valid amount");return;}
+
+let rate=type==="individual"?0.10:0.30;
+const tax=amount*rate;
+
+box.style.display="block";
+output.innerHTML=`CGT (${rate*100}%): ₦${tax.toLocaleString()}`;
+note.innerText="Capital Gains Tax on asset sale";
+}
+</script>
+</body>
+</html>
